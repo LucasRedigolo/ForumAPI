@@ -4,14 +4,15 @@ using System.Data;
 using System.Data.SqlClient;
 
 namespace ForumAPI.Models {
-    public class DAOUsuarios {
+    public class DAOPostagens {
+
         SqlConnection con = null;
         SqlCommand cmd = null;
         SqlDataReader rd = null;
         string conexao = @"Data Source = .\SqlExpress; Initial Catalog = ForumAPI; user id = sa; password = senai@123";
 
-        public List<Usuarios> Listar () {
-            List<Usuarios> usuarios = new List<Usuarios> ();
+        public List<Postagens> Listar () {
+            List<Postagens> postagens = new List<Postagens> ();
 
             try {
                 con = new SqlConnection ();
@@ -20,20 +21,20 @@ namespace ForumAPI.Models {
                 cmd = new SqlCommand ();
                 cmd.Connection = con;
                 cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "Select * from usuario";
+                cmd.CommandText = "Select * from postagem";
                 rd = cmd.ExecuteReader ();
 
                 while (rd.Read ()) {
-                    usuarios.Add (new Usuarios () { ID = rd.GetInt32 (0), Nome = rd.GetString (1), Login = rd.GetString (2), Senha = rd.GetString (3), DataCadastro = rd.GetDateTime (4) });
+                    postagens.Add (new Postagens () { ID = rd.GetInt32 (0), IDTopico = rd.GetInt32 (1), IDUsuario = rd.GetInt32 (2), Mensagem = rd.GetString (3), DataPublicacao = rd.GetDateTime (4) });
                 }
             } catch (SqlException se) {
                 throw new Exception ("Erro ao consultar base de dados" + se.Message);
             } catch (SystemException ex) {
                 throw new Exception (ex.Message);
             }
-            return usuarios;
+            return postagens;
         }
-        public bool Cadastro (Usuarios usuarios) {
+        public bool Cadastro (Postagens postagens) {
             bool resultado = false;
             try {
                 con = new SqlConnection (conexao);
@@ -41,10 +42,10 @@ namespace ForumAPI.Models {
                 cmd = new SqlCommand ();
                 cmd.Connection = con;
                 cmd.CommandType = CommandType.Text;
-                cmd.CommandText = "insert into Usuario (nome, login, senha) values(@n, @l, @s)";
-                cmd.Parameters.AddWithValue ("@n", usuarios.Nome);
-                cmd.Parameters.AddWithValue ("@l", usuarios.Login);
-                cmd.Parameters.AddWithValue ("@s", usuarios.Senha);
+                cmd.CommandText = "insert into postagem (idtopico, idusuario, mensagem) values(@idt, @idu, @m)";
+                cmd.Parameters.AddWithValue ("@idt", postagens.IDTopico);
+                cmd.Parameters.AddWithValue ("@idu", postagens.IDUsuario);
+                cmd.Parameters.AddWithValue ("@m", postagens.Mensagem);
 
                 int r = cmd.ExecuteNonQuery ();
                 if (r > 0)

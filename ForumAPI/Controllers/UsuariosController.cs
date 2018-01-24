@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ForumAPI.Models;
@@ -23,9 +24,36 @@ namespace ForumAPI.Controllers {
         [HttpPost]
         [Route ("api/AddUsuarios")]
         public IActionResult Post ([FromBody] Usuarios usuarios) {
-            dao.Cadastro (usuarios);
-            return CreatedAtRoute ("UsuarioAtual", new { id = usuarios.ID }, usuarios);
+            JsonResult rs;
+            try
+            {   
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }//IF para validar os data annotations
 
+                rs = new JsonResult(dao.Cadastro(usuario));
+                rs.ContentType = "aplication/json";
+                if (!Convert.ToBoolean(rs.Value))
+                {
+                    rs.StatusCode = 404;
+                    rs.Value = "OCORREU UM ERRO! TENTE NOVAMENTE";
+                }
+                else
+                {
+                    rs.StatusCode = 200;
+                }
+
+            }
+            catch (System.Exception ex)
+            {
+                
+                rs = new JsonResult("");
+                rs.StatusCode = 204;
+                rs.ContentType = "application/json";
+                rs.Value = ex.Message;
+            }
+            return Json(rs);
         }
     }
 }
